@@ -152,6 +152,165 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-微服务总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/10/21/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%80%BB%E7%BB%93/">微服务总结</a>
+    </h1>
+  
+
+        
+        <a href="/2021/10/21/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%80%BB%E7%BB%93/" class="archive-article-date">
+  	<time datetime="2021-10-21T01:37:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-21</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <span id="more"></span>
+
+<h2 id="业务场景"><a href="#业务场景" class="headerlink" title="业务场景"></a>业务场景</h2><p>假设现在开发一个电商网站，要实现支付订单的功能，流程如下：</p>
+<ul>
+<li><p>创建一个订单后，如果用户立刻支付了这个订单，我们需要将订单状态更新为“已支付”</p>
+</li>
+<li><p>扣减相应的商品库存</p>
+</li>
+<li><p>通知仓储中心，进行发货</p>
+</li>
+<li><p>给用户的这次购物增加相应的积分</p>
+</li>
+</ul>
+<p>针对上述流程，<strong>我们需要有订单服务、库存服务、仓储服务、积分服务</strong>。整个流程的大体思路如下：</p>
+<ul>
+<li><p>用户针对一个订单完成支付之后，就会去找订单服务，更新订单状态</p>
+</li>
+<li><p>订单服务调用库存服务，完成相应功能</p>
+</li>
+<li><p>订单服务调用仓储服务，完成相应功能</p>
+</li>
+<li><p>订单服务调用积分服务，完成相应功能</p>
+</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/22171638/1634776932773-8f38c5d9-adf4-4ddd-8759-db7cb513de8d.png" alt="img"></p>
+<h2 id="Spring-Cloud核心组件：Eureka（注册中心）"><a href="#Spring-Cloud核心组件：Eureka（注册中心）" class="headerlink" title="Spring Cloud核心组件：Eureka（注册中心）"></a>Spring Cloud核心组件：Eureka（注册中心）</h2><p><strong>首先考虑第一个问题</strong>：订单服务想要调用库存服务、仓储服务，或者积分服务，怎么调用？</p>
+<ul>
+<li>订单服务压根儿就不知道人家库存服务在哪台机器上啊！他就算想要发起一个请求，都不知道发送给谁，有心无力！</li>
+<li>这时候，就轮到Spring Cloud Eureka出场了。Eureka是微服务架构中的注册中心，专门<strong>负责服务的注册与发现</strong>。</li>
+</ul>
+<p>如上图所示 ，四个服务中都有一个Eureka Client组件吗，这个组件专门负责将这个服务的信息注册到Eureka Server中（就是告诉Eureka Service，自己在那台机器上，监听者那个端口）<strong>Eureka Service是一个注册中心，里面有一个注册表，保存着各服务所在的机器和端口号。</strong></p>
+<h4 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h4><ol>
+<li>Eureka Client:负责将这个服务的信息注册带Eureka Server中</li>
+<li>Eureka Server:注册中心，里面有一个注册表，包含了各个服务所在的机器和端口号</li>
+</ol>
+<h2 id="Spring-Cloud核心组件：Feign（声明式服务调用）"><a href="#Spring-Cloud核心组件：Feign（声明式服务调用）" class="headerlink" title="Spring Cloud核心组件：Feign（声明式服务调用）"></a>Spring Cloud核心组件：Feign（声明式服务调用）</h2><p><strong>现在考虑第二个问题：</strong>现在订单服务确实知道库存服务、积分服务、仓库服务在哪里了，同时也监听着哪些端口号了。<strong>但是新问题又来了：难道订单服务要自己写一大堆代码，跟其他服务建立网络连接，然后构造一个复杂的请求，接着发送请求过去，最后对返回的响应结果再写一大堆代码来处理吗？</strong></p>
+<h3 id="什么是Feign："><a href="#什么是Feign：" class="headerlink" title="什么是Feign："></a>什么是Feign：</h3><p>Feign是Spring Cloud Netflix组件中的一个轻量级RESTful 的Http服务客户端，是在了负载均衡个Rest调用的框架，封装了Ribbon和RestTemplate。内置了Ribbon用来最客户端负载均衡调用服务注册中心的服务，Feign是一种声明式、模板化的HTTP客户端仅在Consumer中使用（使用Feign的注解定义接口，调用这个接口就可以调用注册中心的服务）。</p>
+<h3 id="如何使用："><a href="#如何使用：" class="headerlink" title="如何使用："></a>如何使用：</h3><p><strong>Feign的一个关键机制就是使用了动态代理。</strong></p>
+<ol>
+<li><p>首先，如果对某个接口定义了FeignClient注解，Feign就会对这个接口创建一个动态代理</p>
+</li>
+<li><p>接着若要调用那个接口，本质就是会调用Feign创建的动态代理</p>
+</li>
+<li><p>Feign的动态代理会根据在接口上的@RequstMapping等注解来动态构造出要请求的服务的地址 。</p>
+</li>
+<li><p>最后针对这个地址，发起请求、解析响应。</p>
+</li>
+</ol>
+<h2 id="Spring-Cloud核心组件：Ribbon（负载均衡）"><a href="#Spring-Cloud核心组件：Ribbon（负载均衡）" class="headerlink" title="Spring Cloud核心组件：Ribbon（负载均衡）"></a>Spring Cloud核心组件：Ribbon（负载均衡）</h2><p><strong>再来考虑第三个问题：</strong>如果人家的库存服务部署在了5台服务器上例如：</p>
+<ul>
+<li><p>192.168.169:9000</p>
+</li>
+<li><p>192.168.170:9000</p>
+</li>
+<li><p>192.168.171:9000</p>
+</li>
+<li><p>192.168.172:9000</p>
+</li>
+<li><p>192.168.173:9000</p>
+</li>
+</ul>
+<p><strong>此时Feign应该请求那台机器呢？</strong></p>
+<ol>
+<li>Spring Cloud Ribbon就是专门解决这问题的，他的作用是负载均衡，会帮你在每次请求时选择一台机器，均匀的把请求分发到各个机器上。</li>
+<li>Ribbon的负载均衡默认使用Round Robin轮询算法。简单讲就是若订单服务对库存服务发10次请求，就先请求第一台机器第二台机器第三台机器。。。</li>
+</ol>
+<p>Ribbon是和Feign以及Eureka紧密协作的</p>
+<ul>
+<li><p>首先Ribbon会从EurekaClient里获取到对应的服务注册表也就知道了所有的服务都部署在了那些机器上，在监听哪些端口</p>
+</li>
+<li><p>然后Ribbon就可以是使用默认的Round Robin算法，从中选择一台机器</p>
+</li>
+<li><p>Feign机会针对这台机器，构造并发起请求</p>
+</li>
+</ul>
+<h2 id="Spring-Cloud核心组件：Hystrix"><a href="#Spring-Cloud核心组件：Hystrix" class="headerlink" title="Spring Cloud核心组件：Hystrix"></a>Spring Cloud核心组件：Hystrix</h2><h2 id="Spring-Cloud核心组件：Zuul"><a href="#Spring-Cloud核心组件：Zuul" class="headerlink" title="Spring Cloud核心组件：Zuul"></a>Spring Cloud核心组件：Zuul</h2>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">微服务</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Diary//" class="article-tag-list-link color1">Diary</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/10/21/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%80%BB%E7%BB%93/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-什么是微服务？" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
