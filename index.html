@@ -55,7 +55,9 @@
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/%E9%9A%8F%E7%AC%94/">随笔</a></li>
+				<li><a href="/categories">分类</a></li>
+	        
+				<li><a href="/archives">归档</a></li>
 	        
 			</ul>
 		</nav>
@@ -113,6 +115,8 @@
 			
 				
 			
+				
+			
 			
 			
 			<nav class="header-nav">
@@ -130,12 +134,14 @@
 			</nav>
 
 			<nav class="header-menu js-header-menu">
-				<ul style="width: 50%">
+				<ul style="width: 70%">
 				
 				
-					<li style="width: 50%"><a href="/">主页</a></li>
+					<li style="width: 33.333333333333336%"><a href="/">主页</a></li>
 		        
-					<li style="width: 50%"><a href="/tags/%E9%9A%8F%E7%AC%94/">随笔</a></li>
+					<li style="width: 33.333333333333336%"><a href="/categories">分类</a></li>
+		        
+					<li style="width: 33.333333333333336%"><a href="/archives">归档</a></li>
 		        
 				</ul>
 			</nav>
@@ -151,6 +157,131 @@
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-线程池" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/10/22/%E7%BA%BF%E7%A8%8B%E6%B1%A0/">线程池</a>
+    </h1>
+  
+
+        
+        <a href="/2021/10/22/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" class="archive-article-date">
+  	<time datetime="2021-10-22T11:29:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="为什么要使用线程池"><a href="#为什么要使用线程池" class="headerlink" title="为什么要使用线程池"></a>为什么要使用线程池</h3><p>使用线程池的好处是减少在创建和销毁线程上所花费的时间以及资源的开销，解决资源不足的问题。如果不使用线程池，有可能会造成系统创建大量同类线程导致消耗完内存或者“过度切换”的问题。简单来说有以下几个作用：</p>
+<ol>
+<li><ol>
+<li><strong>降低资源消耗</strong>。通过重复利用一创建的线程降低线程创建和销毁造成的消耗。</li>
+<li><strong>提高响应速度</strong>。当任务到达时，任务可以不许带的等到线程创建就能立即执行。</li>
+</ol>
+</li>
+<li><ol>
+<li><strong>提高线程的可管理性</strong>。线程是稀缺资源，如果无限制的创建，不仅会消耗系统资源，还会降低系统的稳定性，使用线程池可以进行统一的分配，调优和监控。</li>
+</ol>
+</li>
+</ol>
+<h3 id="线程池的创建"><a href="#线程池的创建" class="headerlink" title="线程池的创建"></a>线程池的创建</h3><p>创建线程池的方式有如下几种：</p>
+<ul>
+<li><p>Executors.newCachedThreadPood()：无线线程池</p>
+</li>
+<li><p>Executors.newFixedThreadPool()：创建固定大小的线程池。</p>
+</li>
+<li><p>Executors.newSingleThreadExecutor()：创建单个线程的线程池。</p>
+</li>
+</ul>
+<p>实际上述创建方式都是利用<strong>ThreadPoolExecutor</strong>类实现的，我们看一下它的API：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue&lt;Runnable&gt; workQueue, RejectedExecutionHandler handler) </span><br></pre></td></tr></table></figure>
+
+<p>这几个参数的核心作用：</p>
+<ol>
+<li><p>int corePoolSize，线程池的核心线程数量</p>
+</li>
+<li><p>int maximumPoolSize，线程池的最大线程数</p>
+</li>
+<li><p>long keepAliveTime，当线程数大于核心线程数时，多余的空闲线程存活的最长时间</p>
+</li>
+<li><p>TimeUnit unit，时间单位</p>
+</li>
+<li><p>BlockingQueue<Runnable>workQueue，任务队列，用来储存等待执行任务的队列</p>
+</li>
+<li><p>ThreadFactory threadFactory，线程工厂用来创建线程，一般默认</p>
+</li>
+<li><p>handler，拒绝策略，当提交的任务过多不能及时处理时可以定制策略来处理任务。</p>
+</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">多线程</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/categories//" class="article-tag-list-link color1">categories</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/10/22/%E7%BA%BF%E7%A8%8B%E6%B1%A0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-微服务总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -247,7 +378,30 @@
 <li><p>Feign机会针对这台机器，构造并发起请求</p>
 </li>
 </ul>
-<h2 id="Spring-Cloud核心组件：Hystrix"><a href="#Spring-Cloud核心组件：Hystrix" class="headerlink" title="Spring Cloud核心组件：Hystrix"></a>Spring Cloud核心组件：Hystrix</h2><h2 id="Spring-Cloud核心组件：Zuul"><a href="#Spring-Cloud核心组件：Zuul" class="headerlink" title="Spring Cloud核心组件：Zuul"></a>Spring Cloud核心组件：Zuul</h2>
+<h2 id="Spring-Cloud核心组件：Hystrix"><a href="#Spring-Cloud核心组件：Hystrix" class="headerlink" title="Spring Cloud核心组件：Hystrix"></a>Spring Cloud核心组件：Hystrix</h2><p><strong>第四个场景：</strong>在一个微服务架构中，一个系统会有很多的服务；例如订单服务在一个业务流程中需要调用三个服务。假设订单服务自己最多有100个线程可以处理请求，然后积分服务不幸的挂了，每次订单服务调用积分服务时，都会卡住几秒中，然后抛出一个超时异常。</p>
+<p>想想这样会导致什么样的问题？</p>
+<ol>
+<li>如果此时系统处于高并发的场景下，大量请求涌过来的时候，订单服务的100个线程都会卡在积分服务业务这块，会导致订单服务没有一个线程可以处理请求</li>
+<li>然后会导致别人请求订单服务的时候，发现订单服务也挂了，不响应任何请求了。</li>
+</ol>
+<p>上述清型就是<strong>微服务架构中恐怖的服务雪崩</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/Santana2000c/PicBed/main/Snipaste_2021-10-22_14-21-35.png" alt="img"></p>
+<p>如上图所示，<strong>但是我们思考一下，就算是积分服务挂了，订单服务也不用挂啊！</strong>为什么？</p>
+<ul>
+<li>结合业务来看：支付订单的时候，只需要把库存服务扣减了，然后通知仓库发货就ok了</li>
+<li>如果积分服务挂了，大不了等他恢复之后，慢慢人肉手工恢复数据也可以。</li>
+</ul>
+<p>现在我们问题拆分完毕，如何解决呢？Hystrix作为一个可以隔离、熔断以及降级的框架可以解决。说白了，<strong>Hystix会搞很多个小小的线程池</strong>，比如订单服务请求仓库服务是一个线程池，请求积分服务是一个线程池。每个线程池的线程只限于请求当前服务。</p>
+<p><strong>如果现在订单服务挂了，会怎样呢？</strong></p>
+<ol>
+<li><p>由于每个线程池都是独立的相互隔离的，所以不会影响到其他服务之间的调用</p>
+</li>
+<li><p>这个时候如果别人请求订单服务，订单服务还是可以正常调用仓储服务、库存服务，只不过调用积分服务的时候每次都会报错，所以我们直接对积分服务进行熔断不就得了，比如在5分钟内请求积分服务就直接返回了，不用去走网络请求而卡住几秒钟，这个过程就是所谓的熔断。</p>
+</li>
+<li><p>有人会说，积分服务挂了就熔断，好歹做点什么呀。那我们就可以来个降级：每次调用积分服务，就在数据库中记录一条信息，谁谁增加了多少积分，由于积分服务挂了没有添加成功，等积分服务恢复了在根据这些记录手工添加积分。<strong>这个过程就是所谓的降级。</strong></p>
+</li>
+</ol>
+<h2 id="Spring-Cloud核心组件：Zuul"><a href="#Spring-Cloud核心组件：Zuul" class="headerlink" title="Spring Cloud核心组件：Zuul"></a>Spring Cloud核心组件：Zuul</h2>
       
 
       
@@ -512,6 +666,9 @@
   </div>
 </footer>
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!--页面点击小红心-->
+<script type="text/javascript" src="/love.js"></script>
+
     </div>
     <script>
 	var yiliaConfig = {
@@ -588,6 +745,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">微服务</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">多线程</a>
               </li>
             
             <div class="clearfix"></div>

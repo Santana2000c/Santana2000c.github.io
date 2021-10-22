@@ -16,8 +16,9 @@
 <meta property="og:description" content="业务场景假设现在开发一个电商网站，要实现支付订单的功能，流程如下：  创建一个订单后，如果用户立刻支付了这个订单，我们需要将订单状态更新为“已支付”  扣减相应的商品库存  通知仓储中心，进行发货  给用户的这次购物增加相应的积分   针对上述流程，我们需要有订单服务、库存服务、仓储服务、积分服务。整个流程的大体思路如下：  用户针对一个订单完成支付之后，就会去找订单服务，更新订单状态  订单">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://raw.githubusercontent.com/Santana2000c/PicBed/main/Snipaste_2021-10-21_08-41-52.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Santana2000c/PicBed/main/Snipaste_2021-10-22_14-21-35.png">
 <meta property="article:published_time" content="2021-10-21T01:37:15.000Z">
-<meta property="article:modified_time" content="2021-10-21T08:52:08.376Z">
+<meta property="article:modified_time" content="2021-10-22T11:28:53.113Z">
 <meta property="article:author" content="GT">
 <meta property="article:tag" content="微服务">
 <meta name="twitter:card" content="summary">
@@ -62,7 +63,9 @@
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/%E9%9A%8F%E7%AC%94/">随笔</a></li>
+				<li><a href="/categories">分类</a></li>
+	        
+				<li><a href="/archives">归档</a></li>
 	        
 			</ul>
 		</nav>
@@ -120,6 +123,8 @@
 			
 				
 			
+				
+			
 			
 			
 			<nav class="header-nav">
@@ -137,12 +142,14 @@
 			</nav>
 
 			<nav class="header-menu js-header-menu">
-				<ul style="width: 50%">
+				<ul style="width: 70%">
 				
 				
-					<li style="width: 50%"><a href="/">主页</a></li>
+					<li style="width: 33.333333333333336%"><a href="/">主页</a></li>
 		        
-					<li style="width: 50%"><a href="/tags/%E9%9A%8F%E7%AC%94/">随笔</a></li>
+					<li style="width: 33.333333333333336%"><a href="/categories">分类</a></li>
+		        
+					<li style="width: 33.333333333333336%"><a href="/archives">归档</a></li>
 		        
 				</ul>
 			</nav>
@@ -252,7 +259,30 @@
 <li><p>Feign机会针对这台机器，构造并发起请求</p>
 </li>
 </ul>
-<h2 id="Spring-Cloud核心组件：Hystrix"><a href="#Spring-Cloud核心组件：Hystrix" class="headerlink" title="Spring Cloud核心组件：Hystrix"></a>Spring Cloud核心组件：Hystrix</h2><h2 id="Spring-Cloud核心组件：Zuul"><a href="#Spring-Cloud核心组件：Zuul" class="headerlink" title="Spring Cloud核心组件：Zuul"></a>Spring Cloud核心组件：Zuul</h2>
+<h2 id="Spring-Cloud核心组件：Hystrix"><a href="#Spring-Cloud核心组件：Hystrix" class="headerlink" title="Spring Cloud核心组件：Hystrix"></a>Spring Cloud核心组件：Hystrix</h2><p><strong>第四个场景：</strong>在一个微服务架构中，一个系统会有很多的服务；例如订单服务在一个业务流程中需要调用三个服务。假设订单服务自己最多有100个线程可以处理请求，然后积分服务不幸的挂了，每次订单服务调用积分服务时，都会卡住几秒中，然后抛出一个超时异常。</p>
+<p>想想这样会导致什么样的问题？</p>
+<ol>
+<li>如果此时系统处于高并发的场景下，大量请求涌过来的时候，订单服务的100个线程都会卡在积分服务业务这块，会导致订单服务没有一个线程可以处理请求</li>
+<li>然后会导致别人请求订单服务的时候，发现订单服务也挂了，不响应任何请求了。</li>
+</ol>
+<p>上述清型就是<strong>微服务架构中恐怖的服务雪崩</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/Santana2000c/PicBed/main/Snipaste_2021-10-22_14-21-35.png" alt="img"></p>
+<p>如上图所示，<strong>但是我们思考一下，就算是积分服务挂了，订单服务也不用挂啊！</strong>为什么？</p>
+<ul>
+<li>结合业务来看：支付订单的时候，只需要把库存服务扣减了，然后通知仓库发货就ok了</li>
+<li>如果积分服务挂了，大不了等他恢复之后，慢慢人肉手工恢复数据也可以。</li>
+</ul>
+<p>现在我们问题拆分完毕，如何解决呢？Hystrix作为一个可以隔离、熔断以及降级的框架可以解决。说白了，<strong>Hystix会搞很多个小小的线程池</strong>，比如订单服务请求仓库服务是一个线程池，请求积分服务是一个线程池。每个线程池的线程只限于请求当前服务。</p>
+<p><strong>如果现在订单服务挂了，会怎样呢？</strong></p>
+<ol>
+<li><p>由于每个线程池都是独立的相互隔离的，所以不会影响到其他服务之间的调用</p>
+</li>
+<li><p>这个时候如果别人请求订单服务，订单服务还是可以正常调用仓储服务、库存服务，只不过调用积分服务的时候每次都会报错，所以我们直接对积分服务进行熔断不就得了，比如在5分钟内请求积分服务就直接返回了，不用去走网络请求而卡住几秒钟，这个过程就是所谓的熔断。</p>
+</li>
+<li><p>有人会说，积分服务挂了就熔断，好歹做点什么呀。那我们就可以来个降级：每次调用积分服务，就在数据库中记录一条信息，谁谁增加了多少积分，由于积分服务挂了没有添加成功，等积分服务恢复了在根据这些记录手工添加积分。<strong>这个过程就是所谓的降级。</strong></p>
+</li>
+</ol>
+<h2 id="Spring-Cloud核心组件：Zuul"><a href="#Spring-Cloud核心组件：Zuul" class="headerlink" title="Spring Cloud核心组件：Zuul"></a>Spring Cloud核心组件：Zuul</h2>
       
 
       
@@ -367,6 +397,15 @@
   
 <nav id="article-nav">
   
+    <a href="/2021/10/22/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          线程池
+        
+      </div>
+    </a>
+  
   
     <a href="/2021/10/19/%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%EF%BC%9F/" id="article-nav-older" class="article-nav-link-wrap">
       <div class="article-nav-title">什么是微服务？</div>
@@ -437,6 +476,9 @@
   </div>
 </footer>
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!--页面点击小红心-->
+<script type="text/javascript" src="/love.js"></script>
+
     </div>
     <script>
 	var yiliaConfig = {
@@ -513,6 +555,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">微服务</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">多线程</a>
               </li>
             
             <div class="clearfix"></div>
