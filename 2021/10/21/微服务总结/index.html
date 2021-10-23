@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/Santana2000c/PicBed/main/Snipaste_2021-10-21_08-41-52.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/Santana2000c/PicBed/main/Snipaste_2021-10-22_14-21-35.png">
 <meta property="article:published_time" content="2021-10-21T01:37:15.000Z">
-<meta property="article:modified_time" content="2021-10-22T11:28:53.113Z">
+<meta property="article:modified_time" content="2021-10-23T02:01:09.311Z">
 <meta property="article:author" content="GT">
 <meta property="article:tag" content="微服务">
 <meta name="twitter:card" content="summary">
@@ -259,7 +259,7 @@
 <li><p>Feign机会针对这台机器，构造并发起请求</p>
 </li>
 </ul>
-<h2 id="Spring-Cloud核心组件：Hystrix"><a href="#Spring-Cloud核心组件：Hystrix" class="headerlink" title="Spring Cloud核心组件：Hystrix"></a>Spring Cloud核心组件：Hystrix</h2><p><strong>第四个场景：</strong>在一个微服务架构中，一个系统会有很多的服务；例如订单服务在一个业务流程中需要调用三个服务。假设订单服务自己最多有100个线程可以处理请求，然后积分服务不幸的挂了，每次订单服务调用积分服务时，都会卡住几秒中，然后抛出一个超时异常。</p>
+<h2 id="Spring-Cloud核心组件：Hystrix（服务容错）"><a href="#Spring-Cloud核心组件：Hystrix（服务容错）" class="headerlink" title="Spring Cloud核心组件：Hystrix（服务容错）"></a>Spring Cloud核心组件：Hystrix（服务容错）</h2><p><strong>第四个场景：</strong>在一个微服务架构中，一个系统会有很多的服务；例如订单服务在一个业务流程中需要调用三个服务。假设订单服务自己最多有100个线程可以处理请求，然后积分服务不幸的挂了，每次订单服务调用积分服务时，都会卡住几秒中，然后抛出一个超时异常。</p>
 <p>想想这样会导致什么样的问题？</p>
 <ol>
 <li>如果此时系统处于高并发的场景下，大量请求涌过来的时候，订单服务的100个线程都会卡在积分服务业务这块，会导致订单服务没有一个线程可以处理请求</li>
@@ -282,7 +282,12 @@
 <li><p>有人会说，积分服务挂了就熔断，好歹做点什么呀。那我们就可以来个降级：每次调用积分服务，就在数据库中记录一条信息，谁谁增加了多少积分，由于积分服务挂了没有添加成功，等积分服务恢复了在根据这些记录手工添加积分。<strong>这个过程就是所谓的降级。</strong></p>
 </li>
 </ol>
-<h2 id="Spring-Cloud核心组件：Zuul"><a href="#Spring-Cloud核心组件：Zuul" class="headerlink" title="Spring Cloud核心组件：Zuul"></a>Spring Cloud核心组件：Zuul</h2>
+<h2 id="Spring-Cloud核心组件：Zuul（服务网关）"><a href="#Spring-Cloud核心组件：Zuul（服务网关）" class="headerlink" title="Spring Cloud核心组件：Zuul（服务网关）"></a>Spring Cloud核心组件：Zuul（服务网关）</h2><h3 id="什么是Zuul"><a href="#什么是Zuul" class="headerlink" title="什么是Zuul"></a>什么是Zuul</h3><p>Zuul是Netflix开源的微服务网关，它可以和Eureka、Ribbon、Hystrix等配件组合使用，包含了对请求的<strong>路由</strong>和<strong>过滤</strong>两个最主要的功能。</p>
+<h3 id="为什么需要网关"><a href="#为什么需要网关" class="headerlink" title="为什么需要网关"></a>为什么需要网关</h3><ol>
+<li>对于单体应用而言，浏览器发起请求到单体应用所在的机器，应用从数据库查询数据原路返回个浏览器是不需要网关的。</li>
+<li>对于微服务来说：微服务的应用可能在不同的机房、地区、域名下，此时客户端想要请求对应的服务，都需要知道机器的IP或域名URL，当服务数量庞大时无法记忆。此时网关作为客户端与服务器的中间层可以接收客户端发送的请求，根据请求表示解析判断出具体的服务地址，再把请求转发到微服务实例。</li>
+</ol>
+
       
 
       
@@ -435,7 +440,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">业务场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9AEureka%EF%BC%88%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">Spring Cloud核心组件：Eureka（注册中心）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="toc-number">2.0.1.</span> <span class="toc-text">总结：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9AFeign%EF%BC%88%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">Spring Cloud核心组件：Feign（声明式服务调用）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFFeign%EF%BC%9A"><span class="toc-number">3.1.</span> <span class="toc-text">什么是Feign：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%EF%BC%9A"><span class="toc-number">3.2.</span> <span class="toc-text">如何使用：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9ARibbon%EF%BC%88%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">Spring Cloud核心组件：Ribbon（负载均衡）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9AHystrix"><span class="toc-number">5.</span> <span class="toc-text">Spring Cloud核心组件：Hystrix</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9AZuul"><span class="toc-number">6.</span> <span class="toc-text">Spring Cloud核心组件：Zuul</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">业务场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9AEureka%EF%BC%88%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">Spring Cloud核心组件：Eureka（注册中心）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="toc-number">2.0.1.</span> <span class="toc-text">总结：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9AFeign%EF%BC%88%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">Spring Cloud核心组件：Feign（声明式服务调用）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFFeign%EF%BC%9A"><span class="toc-number">3.1.</span> <span class="toc-text">什么是Feign：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%EF%BC%9A"><span class="toc-number">3.2.</span> <span class="toc-text">如何使用：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9ARibbon%EF%BC%88%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">Spring Cloud核心组件：Ribbon（负载均衡）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9AHystrix%EF%BC%88%E6%9C%8D%E5%8A%A1%E5%AE%B9%E9%94%99%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">Spring Cloud核心组件：Hystrix（服务容错）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Cloud%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%EF%BC%9AZuul%EF%BC%88%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3%EF%BC%89"><span class="toc-number">6.</span> <span class="toc-text">Spring Cloud核心组件：Zuul（服务网关）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFZuul"><span class="toc-number">6.1.</span> <span class="toc-text">什么是Zuul</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%BD%91%E5%85%B3"><span class="toc-number">6.2.</span> <span class="toc-text">为什么需要网关</span></a></li></ol></li></ol>
                     </div>
                 </span>
             </div>
